@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -9,10 +10,20 @@ import (
 )
 
 var home = os.Getenv("HOME")
-var tasksPath = home + "/Projects/tasks"
+var configPath = home + "/.config/ttm"
+var config = TtmConfig{
+	TasksPath: home + "/ttm",
+}
 
 func main() {
-	fmt.Println("Arguments:", os.Args)
+    fmt.Println("Arguments:", os.Args)
+
+	fmt.Println("Reading config")
+	err := readConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Config: %+v\n", config)
 
 	cmd := os.Args[1]
 
@@ -48,7 +59,7 @@ func main() {
 }
 
 func createTask(name string) error {
-	taskPath := fmt.Sprintf("%s/%s", tasksPath, name)
+	taskPath := fmt.Sprintf("%s/%s", config.TasksPath, name)
 	err := os.MkdirAll(taskPath, os.ModePerm)
 	if err != nil {
 		return err
@@ -58,13 +69,13 @@ func createTask(name string) error {
 }
 
 func addToTask(name string) error {
-	taskPath := fmt.Sprintf("%s/%s", tasksPath, name)
+	taskPath := config.TasksPath + "/" + name
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-    repoName := filepath.Base(cwd)
-	worktreePath := fmt.Sprintf("%s/%s", taskPath, repoName)
+	repoName := filepath.Base(cwd)
+	worktreePath := taskPath + "/" + repoName
 	cmd := exec.Command("git", "worktree", "add", "-B", name, worktreePath)
 
 	if err = cmd.Run(); err != nil {
@@ -72,4 +83,35 @@ func addToTask(name string) error {
 	}
 
 	return nil
+}
+
+func readConfig() error {
+	file, err := os.Open(configPath + "/ttm.json")
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(configPath, os.ModePerm)
+			if err != nil {
+				return err
+			}
+			file, err = os.Create(configPath + "/ttm.json")
+			if err != nil {
+				return err
+			}
+            encoder := json.NewEncoder(file)
+            encoder.SetIndent("", "    ")
+            err = encoder.Encode(&config)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	decoder := json.NewDecoder(file)
+	decoder.Decode(&config)
+
+	return nil
+}
+
+type TtmConfig struct {
+	TasksPath string `json:"tasksPath"`
 }
