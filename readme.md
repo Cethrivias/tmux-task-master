@@ -4,7 +4,7 @@
 - [x] Read config to get the folder
 - [x] List tasks
 - [x] List project worktrees
-- [ ] Delete project worktrees
+- [x] Delete project worktrees
 - [ ] Delete tasks
 - [ ] Tests that check that command exists with error and correct text if arguments are unknown
 - [ ] Parallelise list projects

@@ -69,19 +69,19 @@ func main() {
 		return
 	}
 
-    if cmd == "delete" {
-        if len(os.Args) < 4 {
-            log.Fatalln("You need to specify task and project name")
-        }
-        taskName := os.Args[2]
-        projectName := os.Args[3]
+	if cmd == "delete" {
+		if len(os.Args) < 4 {
+			log.Fatalln("You need to specify task and project name")
+		}
+		taskName := os.Args[2]
+		projectName := os.Args[3]
 
 		if err := deleteProjectWorktree(taskName, projectName); err != nil {
 			log.Fatal(err)
 		}
 
 		return
-    }
+	}
 
 	log.Fatalf("Unknown command '%s'\n", cmd)
 }
@@ -146,8 +146,29 @@ func listProjects(taskName string) error {
 }
 
 func deleteProjectWorktree(taskName, projectName string) error {
-    return nil
+	cmd := exec.Command("git", "worktree", "remove", config.TasksPath + "/" + taskName + "/" + projectName)
+    output, err := cmd.CombinedOutput()
+    if err != nil {
+        fmt.Println(string(output))
+        return err
+    }
+
+    return err
 }
+
+// func deleteTask(taskName string) error {
+// 	projectDirs, err := os.ReadDir(config.TasksPath + "/" + taskName)
+// 	if err != nil {
+// 		return err
+// 	}
+//     for _, dir := range projectDirs {
+//         cmd := exec.Command("git", "worktree", "remove")
+//         cmd.Dir = config.TasksPath + "/" + taskName + "/" + dir.Name()
+//         err := cmd.Run()
+//     }
+//
+//     return nil
+// }
 
 func readConfig() error {
 	file, err := os.Open(configPath + "/ttm.json")
