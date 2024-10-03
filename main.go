@@ -41,7 +41,15 @@ func main() {
 	}
 
 	if cmd == "list" {
-		if err := listTasks(); err != nil {
+		if len(os.Args) == 2 {
+			if err := listTasks(); err != nil {
+				log.Fatal(err)
+			}
+
+			return
+		}
+		taskName := os.Args[2]
+		if err := listProjects(taskName); err != nil {
 			log.Fatal(err)
 		}
 
@@ -50,7 +58,7 @@ func main() {
 
 	if cmd == "add" {
 		if len(os.Args) < 3 {
-			log.Fatalf("You need to specify task name")
+			log.Fatalln("You need to specify task name")
 		}
 		name := os.Args[2]
 
@@ -60,6 +68,20 @@ func main() {
 
 		return
 	}
+
+    if cmd == "delete" {
+        if len(os.Args) < 4 {
+            log.Fatalln("You need to specify task and project name")
+        }
+        taskName := os.Args[2]
+        projectName := os.Args[3]
+
+		if err := deleteProjectWorktree(taskName, projectName); err != nil {
+			log.Fatal(err)
+		}
+
+		return
+    }
 
 	log.Fatalf("Unknown command '%s'\n", cmd)
 }
@@ -107,6 +129,24 @@ func addToTask(name string) error {
 	fmt.Printf("Added '%s' to task '%s'\n", repoName, name)
 
 	return nil
+}
+
+func listProjects(taskName string) error {
+	dirs, err := os.ReadDir(config.TasksPath + "/" + taskName)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Task '%s' projects:\n", taskName)
+	for _, dir := range dirs {
+		fmt.Println(" - " + dir.Name())
+	}
+
+	return nil
+}
+
+func deleteProjectWorktree(taskName, projectName string) error {
+    return nil
 }
 
 func readConfig() error {
