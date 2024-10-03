@@ -16,26 +16,32 @@ var config = TtmConfig{
 }
 
 func main() {
-    fmt.Println("Arguments:", os.Args)
-
-	fmt.Println("Reading config")
 	err := readConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Config: %+v\n", config)
+
+	if len(os.Args) < 2 {
+		log.Fatalln("You need to specify a command")
+	}
 
 	cmd := os.Args[1]
 
 	if cmd == "create" {
 		if len(os.Args) < 3 {
-			log.Fatalf("You need to specify task name")
+			log.Fatalln("You need to specify task name")
 		}
 		name := os.Args[2]
 
-		fmt.Printf("Creating task '%s'\n", name)
-
 		if err := createTask(name); err != nil {
+			log.Fatal(err)
+		}
+
+		return
+	}
+
+	if cmd == "list" {
+		if err := listTasks(); err != nil {
 			log.Fatal(err)
 		}
 
@@ -59,10 +65,26 @@ func main() {
 }
 
 func createTask(name string) error {
-	taskPath := fmt.Sprintf("%s/%s", config.TasksPath, name)
+	taskPath := config.TasksPath + "/" + name
 	err := os.MkdirAll(taskPath, os.ModePerm)
 	if err != nil {
 		return err
+	}
+
+	fmt.Printf("Created task '%s'\n", name)
+
+	return nil
+}
+
+func listTasks() error {
+	dirs, err := os.ReadDir(config.TasksPath)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Tasks:")
+	for _, dir := range dirs {
+		fmt.Println(" - " + dir.Name())
 	}
 
 	return nil
@@ -82,6 +104,8 @@ func addToTask(name string) error {
 		return err
 	}
 
+	fmt.Printf("Added '%s' to task '%s'\n", repoName, name)
+
 	return nil
 }
 
@@ -97,9 +121,9 @@ func readConfig() error {
 			if err != nil {
 				return err
 			}
-            encoder := json.NewEncoder(file)
-            encoder.SetIndent("", "    ")
-            err = encoder.Encode(&config)
+			encoder := json.NewEncoder(file)
+			encoder.SetIndent("", "    ")
+			err = encoder.Encode(&config)
 			if err != nil {
 				return err
 			}
