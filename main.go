@@ -70,10 +70,18 @@ func main() {
 	}
 
 	if cmd == "delete" {
-		if len(os.Args) < 4 {
-			log.Fatalln("You need to specify task and project name")
+		if len(os.Args) < 3 {
+			log.Fatalln("You need to specify a task")
 		}
 		taskName := os.Args[2]
+
+		if len(os.Args) == 3 {
+			if err := deleteTask(taskName); err != nil {
+				log.Fatalln(err)
+			}
+			return
+		}
+
 		projectName := os.Args[3]
 
 		if err := deleteProjectWorktree(taskName, projectName); err != nil {
@@ -122,7 +130,9 @@ func addToTask(name string) error {
 	worktreePath := taskPath + "/" + repoName
 	cmd := exec.Command("git", "worktree", "add", "-B", name, worktreePath)
 
-	if err = cmd.Run(); err != nil {
+	output, err := cmd.Output()
+	if err != nil {
+		fmt.Println(string(output))
 		return err
 	}
 
@@ -146,29 +156,47 @@ func listProjects(taskName string) error {
 }
 
 func deleteProjectWorktree(taskName, projectName string) error {
-	cmd := exec.Command("git", "worktree", "remove", config.TasksPath + "/" + taskName + "/" + projectName)
-    output, err := cmd.CombinedOutput()
-    if err != nil {
-        fmt.Println(string(output))
-        return err
-    }
+	cmd := exec.Command("git", "worktree", "remove", config.TasksPath+"/"+taskName+"/"+projectName)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println(string(output))
+		return err
+	}
 
-    return err
+	return err
 }
 
-// func deleteTask(taskName string) error {
-// 	projectDirs, err := os.ReadDir(config.TasksPath + "/" + taskName)
-// 	if err != nil {
-// 		return err
-// 	}
-//     for _, dir := range projectDirs {
-//         cmd := exec.Command("git", "worktree", "remove")
-//         cmd.Dir = config.TasksPath + "/" + taskName + "/" + dir.Name()
-//         err := cmd.Run()
-//     }
-//
-//     return nil
-// }
+func deleteTask(taskName string) error {
+	projectDirs, err := os.ReadDir(config.TasksPath + "/" + taskName)
+	if err != nil {
+		return err
+	}
+	if len(projectDirs) > 0 {
+		input := ""
+		fmt.Printf("This task contains %d projects. Do you want to delete it? (y/n)\n", len(projectDirs))
+		_, err = fmt.Scan(&input)
+		if err != nil {
+			return err
+		}
+		if input != "y" {
+			fmt.Println("Aborting")
+			return nil
+		}
+
+		fmt.Printf("Deleting task '%s' projects:\n", taskName)
+		for _, dir := range projectDirs {
+			fmt.Printf(" - %s\n", dir.Name())
+			cmd := exec.Command("git", "worktree", "remove", config.TasksPath+"/"+taskName+"/"+dir.Name())
+			output, err := cmd.Output()
+			if err != nil {
+				fmt.Println(string(output))
+				return err
+			}
+		}
+	}
+
+    return os.Remove(config.TasksPath + "/" + taskName)
+}
 
 func readConfig() error {
 	file, err := os.Open(configPath + "/ttm.json")
