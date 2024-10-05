@@ -3,3 +3,6 @@ build:
 
 install:
 	go install
+
+test.integ:
+	go test main_test.go -v

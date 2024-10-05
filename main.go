@@ -1,22 +1,16 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"ttm/config"
 )
 
-var home = os.Getenv("HOME")
-var configPath = home + "/.config/ttm"
-var config = TtmConfig{
-	TasksPath: home + "/ttm",
-}
-
 func main() {
-	err := readConfig()
+	err := config.Init()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,7 +43,7 @@ func main() {
 			return
 		}
 		taskName := os.Args[2]
-		if err := listProjects(taskName); err != nil {
+		if err := listWorktrees(taskName); err != nil {
 			log.Fatal(err)
 		}
 
@@ -82,9 +76,9 @@ func main() {
 			return
 		}
 
-		projectName := os.Args[3]
+		worktreeName := os.Args[3]
 
-		if err := deleteProjectWorktree(taskName, projectName); err != nil {
+		if err := deleteWorktree(taskName, worktreeName); err != nil {
 			log.Fatal(err)
 		}
 
@@ -95,7 +89,7 @@ func main() {
 }
 
 func createTask(name string) error {
-	taskPath := config.TasksPath + "/" + name
+	taskPath := config.Config.TasksPath + "/" + name
 	err := os.MkdirAll(taskPath, os.ModePerm)
 	if err != nil {
 		return err
@@ -107,7 +101,7 @@ func createTask(name string) error {
 }
 
 func listTasks() error {
-	dirs, err := os.ReadDir(config.TasksPath)
+	dirs, err := os.ReadDir(config.Config.TasksPath)
 	if err != nil {
 		return err
 	}
@@ -121,7 +115,7 @@ func listTasks() error {
 }
 
 func addToTask(name string) error {
-	taskPath := config.TasksPath + "/" + name
+	taskPath := config.Config.TasksPath + "/" + name
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -141,8 +135,8 @@ func addToTask(name string) error {
 	return nil
 }
 
-func listProjects(taskName string) error {
-	dirs, err := os.ReadDir(config.TasksPath + "/" + taskName)
+func listWorktrees(taskName string) error {
+	dirs, err := os.ReadDir(config.Config.TasksPath + "/" + taskName)
 	if err != nil {
 		return err
 	}
@@ -155,8 +149,8 @@ func listProjects(taskName string) error {
 	return nil
 }
 
-func deleteProjectWorktree(taskName, projectName string) error {
-	cmd := exec.Command("git", "worktree", "remove", config.TasksPath+"/"+taskName+"/"+projectName)
+func deleteWorktree(taskName, worktreeName string) error {
+	cmd := exec.Command("git", "worktree", "remove", config.Config.TasksPath+"/"+taskName+"/"+worktreeName)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Println(string(output))
@@ -167,13 +161,13 @@ func deleteProjectWorktree(taskName, projectName string) error {
 }
 
 func deleteTask(taskName string) error {
-	projectDirs, err := os.ReadDir(config.TasksPath + "/" + taskName)
+	worktreeDirs, err := os.ReadDir(config.Config.TasksPath + "/" + taskName)
 	if err != nil {
 		return err
 	}
-	if len(projectDirs) > 0 {
+	if len(worktreeDirs) > 0 {
 		input := ""
-		fmt.Printf("This task contains %d projects. Do you want to delete it? (y/n)\n", len(projectDirs))
+		fmt.Printf("This task contains %d projects. Do you want to delete it? (y/n)\n", len(worktreeDirs))
 		_, err = fmt.Scan(&input)
 		if err != nil {
 			return err
@@ -184,9 +178,9 @@ func deleteTask(taskName string) error {
 		}
 
 		fmt.Printf("Deleting task '%s' projects:\n", taskName)
-		for _, dir := range projectDirs {
+		for _, dir := range worktreeDirs {
 			fmt.Printf(" - %s\n", dir.Name())
-			cmd := exec.Command("git", "worktree", "remove", config.TasksPath+"/"+taskName+"/"+dir.Name())
+			cmd := exec.Command("git", "worktree", "remove", config.Config.TasksPath+"/"+taskName+"/"+dir.Name())
 			output, err := cmd.Output()
 			if err != nil {
 				fmt.Println(string(output))
@@ -195,36 +189,5 @@ func deleteTask(taskName string) error {
 		}
 	}
 
-    return os.Remove(config.TasksPath + "/" + taskName)
-}
-
-func readConfig() error {
-	file, err := os.Open(configPath + "/ttm.json")
-	if err != nil {
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(configPath, os.ModePerm)
-			if err != nil {
-				return err
-			}
-			file, err = os.Create(configPath + "/ttm.json")
-			if err != nil {
-				return err
-			}
-			encoder := json.NewEncoder(file)
-			encoder.SetIndent("", "    ")
-			err = encoder.Encode(&config)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	decoder := json.NewDecoder(file)
-	decoder.Decode(&config)
-
-	return nil
-}
-
-type TtmConfig struct {
-	TasksPath string `json:"tasksPath"`
+	return os.Remove(config.Config.TasksPath + "/" + taskName)
 }
