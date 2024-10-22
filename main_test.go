@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -88,10 +89,10 @@ func TestListWorktrees(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-    worktreeName,err := getWorktreeName();
-    if err != nil {
-        t.Error(err)
-    }
+	worktreeName, err := getWorktreeName()
+	if err != nil {
+		t.Error(err)
+	}
 	worktreePath := getWorktreePath(taskName, worktreeName)
 	cmd := exec.Command("git", "worktree", "add", "-B", taskName, worktreePath)
 	output, err := cmd.Output()
@@ -106,8 +107,9 @@ func TestListWorktrees(t *testing.T) {
 	if err != nil {
 		t.Errorf("Output:\n%s\nError:\n%s\n", string(output), err)
 	}
-	if !strings.Contains(string(output), worktreeName) {
-		t.Errorf("Output:\n%s\nDoes not contain task: %s\n", string(output), worktreeName)
+    expectedWorktree := fmt.Sprintf("%s (%s)", worktreeName, taskName)
+	if !strings.Contains(string(output), expectedWorktree) {
+		t.Errorf("Output:\n%s\nDoes not contain worktree: %s\n", string(output), expectedWorktree)
 	}
 
 	output, err = teardownTask(taskName)
@@ -195,12 +197,12 @@ func TestDeleteTask(t *testing.T) {
 
 	// act
 	cmd = exec.Command("ttm", "delete", taskName)
-    pp, err := cmd.StdinPipe()
-    if err != nil {
-        t.Error(err)
-    }
-    pp.Write([]byte("y\n"))
-    
+	pp, err := cmd.StdinPipe()
+	if err != nil {
+		t.Error(err)
+	}
+	pp.Write([]byte("y\n"))
+
 	output, err = cmd.Output()
 
 	// assert

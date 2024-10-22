@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"ttm/config"
+	"ttm/worktree"
 )
 
 func main() {
@@ -143,7 +144,12 @@ func listWorktrees(taskName string) error {
 
 	fmt.Printf("Task '%s' projects:\n", taskName)
 	for _, dir := range dirs {
-		fmt.Println(" - " + dir.Name())
+        wt := worktree.New(config.Config.TasksPath + "/" + taskName + "/" + dir.Name())
+        branch, err := wt.Branch()
+        if err != nil {
+            return err
+        }
+		fmt.Printf(" - %s (%s)\n", dir.Name(), branch)
 	}
 
 	return nil

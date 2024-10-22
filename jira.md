@@ -12,7 +12,7 @@
     - [x] Add worktree to a task
     - [x] Delete worktree
     - [x] Delete task
-- [ ] Show worktree branches when running list
+- [x] Show worktree branches when running list
 - [ ] Check if the project is already added to the task when running add command
 - [ ] Cleanup this garbage code
     - [ ] Reinvent the wheel by creating my own CLI framework
