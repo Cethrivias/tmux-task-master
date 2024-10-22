@@ -13,11 +13,12 @@
     - [x] Delete worktree
     - [x] Delete task
 - [x] Show worktree branches when running list
-- [ ] Check if the project is already added to the task when running add command
+- [x] Check if the project is already added to the task when running add command
 - [ ] Cleanup this garbage code
     - [ ] Reinvent the wheel by creating my own CLI framework
     - [ ] A lot of repetition in tests and code. Inconsistent naming for the same things
 - [ ] Parallelise list projects
 - [ ] Adding a repo with a conflicting name causes an error.
-    - [ ] Error message is missing ?!?!
+    - [x] Error message is missing ?!?!
+    - [ ] Ask for a different name
 

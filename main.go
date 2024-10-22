@@ -115,23 +115,20 @@ func listTasks() error {
 	return nil
 }
 
-func addToTask(name string) error {
-	taskPath := config.Config.TasksPath + "/" + name
+func addToTask(taskName string) error {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-	repoName := filepath.Base(cwd)
-	worktreePath := taskPath + "/" + repoName
-	cmd := exec.Command("git", "worktree", "add", "-B", name, worktreePath)
 
-	output, err := cmd.Output()
+	repoName := filepath.Base(cwd)
+    wt := worktree.New(taskName, repoName)
+    err = wt.Create()
 	if err != nil {
-		fmt.Println(string(output))
 		return err
 	}
 
-	fmt.Printf("Added '%s' to task '%s'\n", repoName, name)
+	fmt.Printf("Added '%s' to task '%s'\n", repoName, taskName)
 
 	return nil
 }
@@ -144,7 +141,7 @@ func listWorktrees(taskName string) error {
 
 	fmt.Printf("Task '%s' projects:\n", taskName)
 	for _, dir := range dirs {
-        wt := worktree.New(config.Config.TasksPath + "/" + taskName + "/" + dir.Name())
+        wt := worktree.New(taskName, dir.Name())
         branch, err := wt.Branch()
         if err != nil {
             return err
