@@ -6,3 +6,6 @@ install:
 
 test.integ:
 	go test main_test.go -v
+
+format:
+	go fmt ./...

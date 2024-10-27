@@ -107,9 +107,13 @@ func TestListWorktrees(t *testing.T) {
 	if err != nil {
 		t.Errorf("Output:\n%s\nError:\n%s\n", string(output), err)
 	}
-    expectedWorktree := fmt.Sprintf("%s (%s)", worktreeName, taskName)
+	expectedWorktree := fmt.Sprintf("%s (%s)", worktreeName, taskName)
 	if !strings.Contains(string(output), expectedWorktree) {
-		t.Errorf("Output:\n%s\nDoes not contain worktree: %s\n", string(output), expectedWorktree)
+		t.Errorf(
+			"Output:\n%s\nDoes not contain worktree: %s\n",
+			string(output),
+			expectedWorktree,
+		)
 	}
 
 	output, err = teardownTask(taskName)

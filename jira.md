@@ -14,11 +14,13 @@
     - [x] Delete task
 - [x] Show worktree branches when running list
 - [x] Check if the project is already added to the task when running add command
-- [ ] Cleanup this garbage code
-    - [ ] Reinvent the wheel by creating my own CLI framework
-    - [ ] A lot of repetition in tests and code. Inconsistent naming for the same things
-- [ ] Parallelise list projects
+- [x] Cleanup this garbage code
+    - [x] Reinvent the wheel by creating my own CLI framework
+    - [x] A lot of repetition in tests and code. Inconsistent naming for the same things (good enough now)
+        - [x] Task "class"
+- [x] Parallelise list projects (no reason to complicate things for now)
+- [ ] Add descriptive error messages
 - [ ] Adding a repo with a conflicting name causes an error.
     - [x] Error message is missing ?!?!
     - [ ] Ask for a different name
-
+- [ ] Start adding tmux integration
