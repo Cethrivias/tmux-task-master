@@ -48,5 +48,5 @@ func (w *Worktree) Delete() (string, error) {
 	cmd := exec.Command("git", "worktree", "remove", w.Fullpath)
 	output, err := cmd.CombinedOutput()
 
-    return string(output), err
+	return string(output), err
 }

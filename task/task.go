@@ -2,7 +2,6 @@ package task
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"ttm/config"
 )
@@ -28,8 +27,6 @@ func (task *Task) Create() error {
 	if err != nil {
 		return errors.Join(couldNotCreateTaskDir, err)
 	}
-
-	fmt.Printf("Created task '%s'\n", task.Name)
 
 	return nil
 }

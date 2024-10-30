@@ -24,3 +24,5 @@
     - [x] Error message is missing ?!?!
     - [ ] Ask for a different name
 - [ ] Start adding tmux integration
+    - [x] Create session and window
+        - [ ] Add tests
