@@ -20,6 +20,16 @@
         - [x] Task "class"
 - [x] Parallelise list projects (no reason to complicate things for now)
 - [ ] Add descriptive error messages
+    ```
+    ❯ ttm delete TASK-001                                                              1.25s
+    This task contains 1 projects. Do you want to delete it? (y/n)
+    y
+    Deleting task 'TASK-001' projects:
+     - my.fancy.project
+    fatal: not a git repository (or any of the parent directories): .git
+
+    2024/11/11 10:28:53 exit status 128
+    ```
 - [ ] Adding a repo with a conflicting name causes an error.
     - [x] Error message is missing ?!?!
     - [ ] Ask for a different name
