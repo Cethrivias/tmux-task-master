@@ -22,9 +22,7 @@ func Delete(args []string) error {
 }
 
 func deleteWorktree(taskName, worktreeName string) error {
-	output, err := worktree.New(taskName, worktreeName).Delete()
-	if err != nil {
-		fmt.Println(output)
+	if err := worktree.New(taskName, worktreeName).Delete(); err != nil {
 		return err
 	}
 
@@ -40,8 +38,7 @@ func deleteTask(taskName string) error {
 	if len(worktreeDirs) > 0 {
 		input := ""
 		fmt.Printf("This task contains %d projects. Do you want to delete it? (y/n)\n", len(worktreeDirs))
-		_, err = fmt.Scan(&input)
-		if err != nil {
+		if _, err = fmt.Scan(&input); err != nil {
 			return err
 		}
 		if input != "y" {
@@ -52,9 +49,7 @@ func deleteTask(taskName string) error {
 		fmt.Printf("Deleting task '%s' projects:\n", taskName)
 		for _, dir := range worktreeDirs {
 			fmt.Printf(" - %s\n", dir.Name())
-			output, err := worktree.New(taskName, dir.Name()).Delete()
-			if err != nil {
-				fmt.Println(output)
+			if err := worktree.New(taskName, dir.Name()).Delete(); err != nil {
 				return err
 			}
 		}

@@ -55,9 +55,7 @@ func TestWorktreeDelete(t *testing.T) {
 			return
 		}
 
-		out, err := wt.Delete()
-		if err != nil {
-			t.Error(out)
+		if err = wt.Delete(); err != nil {
 			t.Error(err)
 		}
 		if err = os.Chdir(prevCwd); err != nil {

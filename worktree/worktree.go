@@ -1,7 +1,7 @@
 package worktree
 
 import (
-	"fmt"
+	"errors"
 	"os/exec"
 	"ttm/config"
 )
@@ -11,6 +11,12 @@ type Worktree struct {
 	WorktreeName string
 	Fullpath     string
 }
+
+var (
+	GetGitBranchError   = errors.New("Could not get Git branch")
+	CreateWorktreeError = errors.New("Could not create a worktree")
+	DeleteWorktreeError = errors.New("Could not delete a worktree")
+)
 
 func New(taskName, worktreeName string) *Worktree {
 	return &Worktree{
@@ -26,7 +32,7 @@ func (w *Worktree) Branch() (string, error) {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", err
+		return "", errors.Join(GetGitBranchError, errors.New(string(output)), err)
 	}
 
 	return string(output[:len(output)-1]), nil
@@ -35,19 +41,19 @@ func (w *Worktree) Branch() (string, error) {
 func (w *Worktree) Create() error {
 	cmd := exec.Command("git", "worktree", "add", "-B", w.TaskName, w.Fullpath)
 
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println(string(output))
-		return err
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return errors.Join(CreateWorktreeError, errors.New(string(output)), err)
 	}
 
 	return nil
 }
 
-func (w *Worktree) Delete() (string, error) {
+func (w *Worktree) Delete() error {
 	cmd := exec.Command("git", "worktree", "remove", w.Fullpath)
 	cmd.Dir = w.Fullpath
-	output, err := cmd.CombinedOutput()
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return errors.Join(DeleteWorktreeError, errors.New(string(output)), err)
+	}
 
-	return string(output), err
+	return nil
 }
