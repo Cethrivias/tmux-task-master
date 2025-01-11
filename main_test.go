@@ -3,14 +3,12 @@ package main_test
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 	"ttm/config"
+	"ttm/utils"
 )
 
 func TestMain(m *testing.M) {
@@ -31,12 +29,12 @@ func TestMain(m *testing.M) {
 }
 
 func TestHappyPath(t *testing.T) {
-	taskName := generateTaskName()
-	worktreeName, err := getWorktreeName()
+	taskName := utils.GenerateTestTaskName()
+	worktreeName, err := utils.GetWorktreeName()
 	if err != nil {
 		t.Error(err)
 	}
-	worktreePath := getWorktreePath(taskName, worktreeName)
+	worktreePath := utils.GetWorktreePath(taskName, worktreeName)
 
 	t.Run("Creates task", func(t *testing.T) {
 		// act
@@ -47,7 +45,7 @@ func TestHappyPath(t *testing.T) {
 		if err != nil {
 			t.Errorf("Output:\n%s\nError:\n%s\n", string(output), err)
 		}
-		info, err := os.Stat(getTaskPath(taskName))
+		info, err := os.Stat(utils.GetTaskPath(taskName))
 		if err != nil {
 			t.Error(err)
 		}
@@ -79,7 +77,7 @@ func TestHappyPath(t *testing.T) {
 		if err != nil {
 			t.Errorf("Output:\n%s\nError:\n%s\n", string(output), err)
 		}
-		info, err := os.Stat(getWorktreePath(taskName, worktreeName))
+		info, err := os.Stat(utils.GetWorktreePath(taskName, worktreeName))
 		if err != nil {
 			t.Error(err)
 		}
@@ -145,69 +143,14 @@ func TestHappyPath(t *testing.T) {
 		if err != nil && !os.IsNotExist(err) {
 			t.Error(err)
 		}
-		_, err = os.Stat(getTaskPath(taskName))
+		_, err = os.Stat(utils.GetTaskPath(taskName))
 		if err != nil && !os.IsNotExist(err) {
 			t.Error(err)
 		}
 	})
-	out, err := teardownTask(taskName)
+
+	out, err := utils.TeardownTask(taskName)
 	if err != nil {
 		t.Errorf("Output:\n%s\nError:\n%s\n", string(out), err)
 	}
-}
-
-func generateTaskName() string {
-	return "ttm-test-task-" + strconv.Itoa(rand.Int())
-}
-
-func getWorktreeName() (string, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	worktreeName := filepath.Base(cwd)
-
-	return worktreeName, err
-}
-
-func getTaskPath(taskName string) string {
-	return config.Config.TasksPath + "/" + taskName
-}
-
-func getWorktreePath(taskName, worktreeName string) string {
-	return getTaskPath(taskName) + "/" + worktreeName
-}
-
-func setupTask(taskName string) error {
-	return os.MkdirAll(getTaskPath(taskName), os.ModePerm)
-}
-
-func teardownTask(taskName string) ([]byte, error) {
-	taskPath := getTaskPath(taskName)
-	worktreeName, err := getWorktreeName()
-	if err != nil {
-		return []byte{}, err
-	}
-	worktreePath := getWorktreePath(taskName, worktreeName)
-
-	_, err = os.Stat(worktreePath)
-	if err != nil && !os.IsNotExist(err) {
-		// some random error
-		return []byte{}, err
-	}
-
-	if !os.IsNotExist(err) {
-		// dir exists. need to cleanup
-		output, err := exec.Command("git", "worktree", "remove", worktreePath).Output()
-		if err != nil {
-			return output, err
-		}
-	}
-	output, err := exec.Command("git", "branch", "-D", taskName).Output()
-	if err != nil && (len(output) != 0 || err.Error() != "exit status 1") {
-		// empty output + status 1 => branch does not exist
-		return output, err
-	}
-
-	return []byte{}, os.RemoveAll(taskPath)
 }

@@ -19,6 +19,7 @@
     - [x] A lot of repetition in tests and code. Inconsistent naming for the same things (good enough now)
         - [x] Task "class"
 - [x] Parallelise list projects (no reason to complicate things for now)
+- [x] Not possible to delete a worktree if CWD is not a part of that worktree's repo
 - [ ] Add descriptive error messages
     ```
     ❯ ttm delete TASK-001                                                              1.25s
