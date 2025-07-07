@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"ttm/task"
+	"ttm/tmux"
 	"ttm/worktree"
 )
 
@@ -53,6 +54,10 @@ func deleteTask(taskName string) error {
 				return err
 			}
 		}
+	}
+
+	if err := tmux.KillSession(taskName); err != nil {
+		return err
 	}
 
 	return t.Delete()

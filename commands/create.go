@@ -3,6 +3,7 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"ttm/config"
 	"ttm/task"
 	"ttm/tmux"
 )
@@ -14,7 +15,7 @@ func Create(args []string) error {
 
 	name := args[1]
 	if err := task.New(name).Create(); err != nil {
-		return errors.Join(couldNotCreateTask, err)
+		return errors.Join(CouldNotCreateTask, err)
 	}
 
 	if err := tmux.NewSession(name); err != nil {
@@ -22,8 +23,17 @@ func Create(args []string) error {
 		case errors.Is(err, tmux.DuplicateSessionError):
 			fmt.Printf("Tmux session '%s' already exists\n", name)
 		default:
-			return errors.Join(couldNotCreateTask, err)
+			return errors.Join(CouldNotCreateTask, err)
 		}
+	}
+
+	if err := tmux.NewWindow(name, "cmd"); err != nil {
+		return errors.Join(CouldNotCreateTask, err)
+	}
+
+	err := tmux.SetWindowDir(name, "cmd", config.Config.TasksPath+"/"+name)
+	if err != nil {
+		return errors.Join(CouldNotCreateTask, err)
 	}
 
 	fmt.Printf("Created task '%s'\n", name)

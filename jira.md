@@ -31,9 +31,6 @@
 
     2024/11/11 10:28:53 exit status 128
     ```
-- [ ] Adding a repo with a conflicting name causes an error.
-    - [x] Error message is missing ?!?!
-    - [ ] Ask for a different name
-- [ ] Start adding tmux integration
-    - [x] Create session and window
-        - [ ] Add tests
+----------
+
+# Moved to Obsidian

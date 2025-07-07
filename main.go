@@ -7,7 +7,14 @@ import (
 	"ttm/config"
 )
 
+var (
+	version string
+	build   string
+)
+
 func main() {
+	log.Printf("Version: %s (Build: %s)\n", version, build)
+
 	err := config.Init()
 	if err != nil {
 		log.Fatal(err)
